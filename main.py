@@ -12,17 +12,22 @@ def main():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
     #this sets the screen parameters
+    updateable = pygame.sprite.Group()
+    drawable = pygame.sprite.Group()
+    Player.containers = (updateable, drawable)
     while True:
         #this is the main loop for the game to run
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 #this makes the game stop when the user closes the game-screen
                 return
-        player.update(dt)
+        for thing in updateable:
+            thing.update(dt)
         #gives the ability to move the player
         screen.fill((0,0,0))
         #this fills the screen with the color black
-        player.draw(screen)
+        for thing in drawable:
+            thing.draw(screen)
         #this draws the player
         pygame.display.flip()
         #this helps display the screen
