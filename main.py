@@ -1,37 +1,61 @@
 # use "source venv/bin/activate" in the Terminal (after directing to the appropriate directory) to activate the environment before running this file
+import sys
 import pygame
 from constants import *
 from player import Player
+from asteroid import Asteroid
+from asteroidfield import AsteroidField
+from shot import Shot
 
 
 def main():
     pygame.init()
-    #this initiates pygame
-    clock = pygame.time.Clock()
-    dt = 0
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
-    #this sets the screen parameters
-    updateable = pygame.sprite.Group()
+    clock = pygame.time.Clock()
+
+    updatable = pygame.sprite.Group()
     drawable = pygame.sprite.Group()
-    Player.containers = (updateable, drawable)
+    asteroids = pygame.sprite.Group()
+    shots = pygame.sprite.Group()
+
+    Asteroid.containers = (asteroids, updatable, drawable)
+    Shot.containers = (shots, updatable, drawable)
+    AsteroidField.containers = updatable
+    asteroid_field = AsteroidField()
+
+    Player.containers = (updatable, drawable)
+
+    player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+
+    dt = 0
+
     while True:
-        #this is the main loop for the game to run
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                #this makes the game stop when the user closes the game-screen
                 return
-        for thing in updateable:
-            thing.update(dt)
-        #gives the ability to move the player
-        screen.fill((0,0,0))
-        #this fills the screen with the color black
-        for thing in drawable:
-            thing.draw(screen)
-        #this draws the player
+
+        updatable.update(dt)
+
+        for asteroid in asteroids:
+            if asteroid.collides_with(player):
+                print("Game over!")
+                sys.exit()
+
+            for shot in shots:
+                    if asteroid.collides_with(shot):
+                        shot.kill()
+                        asteroid.split()
+
+        screen.fill("black")
+
+        for obj in drawable:
+            obj.draw(screen)
+
         pygame.display.flip()
-        #this helps display the screen
-        dt = clock.tick(60)/1000
-        #this limits the framerate to 60 FPS
+
+        # limit the framerate to 60 FPS
+        dt = clock.tick(60) / 1000
+
+
 if __name__ == "__main__":
     main()
